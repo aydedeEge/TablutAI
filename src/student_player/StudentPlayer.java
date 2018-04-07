@@ -1,8 +1,12 @@
 package student_player;
 
+
+import java.util.List;
+
 import boardgame.Move;
 import tablut.TablutBoardState;
 import tablut.TablutPlayer;
+import tablut.TablutMove;
 
 /** A player file submitted by a student. */
 public class StudentPlayer extends TablutPlayer {
@@ -12,6 +16,10 @@ public class StudentPlayer extends TablutPlayer {
      * important, because this is what the code that runs the competition uses to
      * associate you with your agent. The constructor should do nothing else.
      */
+	
+	public static final int SWEDE = 1;
+	public static final int MUSCOVITE = 0;
+	
     public StudentPlayer() {
         super("xxxxxxxxx");
     }
@@ -22,15 +30,51 @@ public class StudentPlayer extends TablutPlayer {
      * make decisions.
      */
     public Move chooseMove(TablutBoardState boardState) {
-        // You probably will make separate functions in MyTools.
-        // For example, maybe you'll need to load some pre-processed best opening
-        // strategies...
-        MyTools.getSomething();
+        
+        // Start by getting all possible moves
+        List<TablutMove> options = boardState.getAllLegalMoves();
+        double minUtility = 1000;
+        double maxUtility = -1000;
+        double currentUtility;
+        //Initial Value
+        TablutMove bestMove = (TablutMove) boardState.getRandomMove();
+        
+        if(boardState.getTurnPlayer()==SWEDE) {
+            for(TablutMove move: options) {
+            	// To evaluate a move, clone the boardState so that we can do modifications on
+                // it.
+                TablutBoardState cloneBS = (TablutBoardState) boardState.clone();
 
-        // Is random the best you can do?
-        Move myMove = boardState.getRandomMove();
+                //Process that move, as if we actually made it happen.
+                cloneBS.processMove(move);
+                currentUtility = MyTools.miniMax(cloneBS, 0);
+
+            	if(currentUtility<minUtility) {
+            		minUtility = currentUtility;
+            		bestMove = move;
+            	}
+            }
+        }
+        
+        if(boardState.getTurnPlayer()==MUSCOVITE) {
+            for(TablutMove move: options) {
+            	// To evaluate a move, clone the boardState so that we can do modifications on
+                // it.
+                TablutBoardState cloneBS = (TablutBoardState) boardState.clone();
+
+                // Process that move, as if we actually made it happen.
+                cloneBS.processMove(move);
+                currentUtility = MyTools.miniMax(cloneBS, 0);
+
+            	if(currentUtility>maxUtility) {
+            		maxUtility = currentUtility;
+            		bestMove = move;
+            	}
+            }
+        }
+        
 
         // Return your move to be processed by the server.
-        return myMove;
+        return bestMove;
     }
 }
