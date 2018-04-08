@@ -18,7 +18,7 @@ public class MyTools {
 	public static final double OPP2DISTPENALTY = 0;
 	public static final double OPP3DISTPENALTY = 0;
 	public static final double ADJACENTKINGPENALTY = 5;
-	public static final int MAX_DEPTH = 1;
+	public static final int MAX_DEPTH = 2;
 	
     public static double getSomething() {
         return Math.random();
@@ -39,9 +39,7 @@ public class MyTools {
     	int kingElim = 1000;
     	int kingSafe = -1000;
     	int kingCorner = 0;
-    	Coord kingsCoord= boardstate.getKingPosition();;
-    	int kingsCoordX = kingsCoord.x;
-    	int kingsCoordY = kingsCoord.y;
+    	Coord kingsCoord= boardstate.getKingPosition();
     	int kingInSightOfCorner = 0;
     	int adjacentBlackPieces = 0;
     	
@@ -59,20 +57,22 @@ public class MyTools {
     	
     	
     	/*Check if MUSCOVITES win: king is captured*/
-    	if(boardstate.getKingPosition()==null) {
+    	if(boardstate.getWinner()==MUSCOVITE) {
     		totalUtility += kingElim;
+    	}else if(boardstate.getWinner()==SWEDE){
+    		totalUtility -= kingElim;
     	}
     	
     	
-    	/*Check if SWEDES win: king is on a corner*/
-    	if(Coordinates.isCorner(boardstate.getKingPosition())) {
-    		totalUtility -= kingSafe;
-    	}
-    	
-    	
-    	/*Get distance to closest corner for king*/
-    	kingCorner = Coordinates.distanceToClosestCorner(kingsCoord);
-    	totalUtility += kingCorner;
+//    	/*Check if SWEDES win: king is on a corner*/
+//    	if(Coordinates.isCorner(boardstate.getKingPosition())) {
+//    		totalUtility -= kingSafe;
+//    	}
+//    	
+//    	
+//    	/*Get distance to closest corner for king*/
+//    	kingCorner = Coordinates.distanceToClosestCorner(kingsCoord);
+//    	totalUtility += kingCorner;
     	
     	
     	/*Check for check condition*/
@@ -182,17 +182,18 @@ public class MyTools {
     }
     
     
-    public static BestUtilityMove miniMax(TablutBoardState tbs, int level, BestUtilityMove bestMoveAndUtility) {
+    public static BestUtilityMove miniMax(TablutBoardState tbs, int level, TablutMove lastMove) {
     	
+    	BestUtilityMove currentMoveAndUtility;
     	double currentUtility = getUtility(tbs);
     	
     	//Max depth of minimax
     	if(level==MAX_DEPTH) {
-    		return new BestUtilityMove(null, currentUtility);
+    		return new BestUtilityMove(lastMove, currentUtility);
     	//Check if gameover
     		/*CAN BE CACHED*/
     	}else if(tbs.getKingPosition()==null||Coordinates.isCorner(tbs.getKingPosition())) {
-    		return new BestUtilityMove(null, currentUtility);
+    		return new BestUtilityMove(lastMove, currentUtility);
     	}
 
     	List<TablutMove> options = tbs.getAllLegalMoves();
@@ -200,7 +201,7 @@ public class MyTools {
     	//Muscovites turn: highest utility possible
     	if(tbs.getTurnPlayer()==MUSCOVITE) {
     
-    		bestMoveAndUtility.bestUtility = -1000;
+    		BestUtilityMove bestMoveAndUtility = new BestUtilityMove(null, -1000);
     		//Iterate through each possible move from this Board State
     		for(TablutMove move: options) {
     			
@@ -211,21 +212,20 @@ public class MyTools {
     			cloneBS.processMove(move);
     			
     			//Calculate utility of processed move
-    			
-    			currentUtility = miniMax(cloneBS, level+1);
+    			currentMoveAndUtility = miniMax(cloneBS, level+1, move);
 
     			//Return the MAXIMIZED utility for Muscovites
-    			if(currentUtility > bestMoveAndUtility.bestUtility) {
-    				bestMoveAndUtility.bestUtility = currentUtility;
+    			if(currentMoveAndUtility.bestUtility > bestMoveAndUtility.bestUtility) {
+    				bestMoveAndUtility.bestUtility = currentMoveAndUtility.bestUtility;
     				bestMoveAndUtility.bestMove = move;
     			}
     		}
-    		return bestMoveAndUtility;;
+    		return bestMoveAndUtility;
     		
     	//Swedes turn: lowest utility possible
-    	}else if(tbs.getTurnPlayer()==SWEDE) {
+    	}else{
     		
-    		bestUtility = 1000;
+    		BestUtilityMove bestMoveAndUtility = new BestUtilityMove(null, 1000);
     		//Iterate through each possible move from this Board State
     		for(TablutMove move: options) {
     			
@@ -236,17 +236,16 @@ public class MyTools {
     			cloneBS.processMove(move);
     			
     			//Calculate utility of processed move
-    			currentUtility = miniMax(cloneBS, level+1);
+    			currentMoveAndUtility = miniMax(cloneBS, level+1, move);
     			
     			//Return the MAXIMIZED utility for Swedes
-    			if(currentUtility < bestUtility) {
-    				bestUtility = currentUtility;
+    			if(currentMoveAndUtility.bestUtility < bestMoveAndUtility.bestUtility) {
+    				bestMoveAndUtility.bestUtility = currentMoveAndUtility.bestUtility;
+    				bestMoveAndUtility.bestMove = move;
     			}
     		}
-    		return bestUtility;
-    	}
-    	
-    	return bestUtility;
+    		return bestMoveAndUtility;
+    	} 
     }
     
 }

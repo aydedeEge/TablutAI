@@ -21,7 +21,7 @@ public class StudentPlayer extends TablutPlayer {
 	public static final int MUSCOVITE = 0;
 	
     public StudentPlayer() {
-        super("xxxxxxxxx");
+        super("260576559");
     }
 
     /**
@@ -38,40 +38,41 @@ public class StudentPlayer extends TablutPlayer {
         double currentUtility;
         //Initial Value
         TablutMove bestMove = (TablutMove) boardState.getRandomMove();
-        
-        if(boardState.getTurnPlayer()==SWEDE) {
-            for(TablutMove move: options) {
-            	// To evaluate a move, clone the boardState so that we can do modifications on
-                // it.
-                TablutBoardState cloneBS = (TablutBoardState) boardState.clone();
-
-                //Process that move, as if we actually made it happen.
-                cloneBS.processMove(move);
-                currentUtility = MyTools.miniMax(cloneBS, 0);
-
-            	if(currentUtility<minUtility) {
-            		minUtility = currentUtility;
-            		bestMove = move;
-            	}
-            }
-        }
-        
-        if(boardState.getTurnPlayer()==MUSCOVITE) {
-            for(TablutMove move: options) {
-            	// To evaluate a move, clone the boardState so that we can do modifications on
-                // it.
-                TablutBoardState cloneBS = (TablutBoardState) boardState.clone();
-
-                // Process that move, as if we actually made it happen.
-                cloneBS.processMove(move);
-                currentUtility = MyTools.miniMax(cloneBS, 0);
-
-            	if(currentUtility>maxUtility) {
-            		maxUtility = currentUtility;
-            		bestMove = move;
-            	}
-            }
-        }
+        BestUtilityMove bestUMove = MyTools.miniMax(boardState, 0, null);
+        bestMove = bestUMove.bestMove;
+//        if(boardState.getTurnPlayer()==SWEDE) {
+//            for(TablutMove move: options) {
+//            	// To evaluate a move, clone the boardState so that we can do modifications on
+//                // it.
+//                TablutBoardState cloneBS = (TablutBoardState) boardState.clone();
+//
+//                //Process that move, as if we actually made it happen.
+//                cloneBS.processMove(move);
+//                currentUtility = MyTools.miniMax(cloneBS, 0);
+//
+//            	if(currentUtility<minUtility) {
+//            		minUtility = currentUtility;
+//            		bestMove = move;
+//            	}
+//            }
+//        }
+//        
+//        if(boardState.getTurnPlayer()==MUSCOVITE) {
+//            for(TablutMove move: options) {
+//            	// To evaluate a move, clone the boardState so that we can do modifications on
+//                // it.
+//                TablutBoardState cloneBS = (TablutBoardState) boardState.clone();
+//
+//                // Process that move, as if we actually made it happen.
+//                cloneBS.processMove(move);
+//                currentUtility = MyTools.miniMax(cloneBS, 0);
+//
+//            	if(currentUtility>maxUtility) {
+//            		maxUtility = currentUtility;
+//            		bestMove = move;
+//            	}
+//            }
+//        }
         
 
         // Return your move to be processed by the server.
